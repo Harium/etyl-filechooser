@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.harium</groupId>
     <artifactId>etyl-filechooser</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <packaging>jar</packaging>
     <name>Etyl Filechooser</name>
     <description>A filechooser module to etyl</description>
@@ -29,7 +29,7 @@
         <dependency>
             <groupId>com.harium</groupId>
             <artifactId>etyl</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
