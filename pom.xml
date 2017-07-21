@@ -30,7 +30,7 @@
             <groupId>com.harium</groupId>
             <artifactId>etyl</artifactId>
             <version>1.0.4</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
