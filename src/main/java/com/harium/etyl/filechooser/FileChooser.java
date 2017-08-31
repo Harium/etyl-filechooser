@@ -8,11 +8,10 @@ import com.harium.etyl.commons.event.PointerState;
 import com.harium.etyl.commons.graphics.Color;
 import com.harium.etyl.core.graphics.Graphics;
 import com.harium.etyl.layer.ImageLayer;
+import com.harium.etyl.util.PathHelper;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class FileChooser {
 
@@ -41,7 +40,7 @@ public class FileChooser {
     Folder selectedFile = NULL_FOLDER;
 
     List<Folder> folders = new ArrayList<>();
-    String extension = "";
+    Set<String> extensions = new HashSet<>();
 
     // File Chooser
     boolean chooseFile = true;
@@ -78,6 +77,8 @@ public class FileChooser {
     private void init() {
         folderIcon = new ImageLayer("ui/icon/mfolder.png");
         upIcon = new ImageLayer("ui/icon/mup.png");
+
+        pw = w / 3;
 
         px = w / 2 - pw / 2;
 
@@ -181,8 +182,9 @@ public class FileChooser {
             if (folder.isDirectory()) {
                 sorted.add(folder.getName());
             } else if (folder.isFile()) {
-                if (!extension.isEmpty()) {
-                    if (!folder.getName().endsWith(extension)) {
+                if (!extensions.isEmpty()) {
+                    String extension = PathHelper.getExtension(folder.getName());
+                    if (!extensions.contains(extension)) {
                         continue;
                     }
                 }
@@ -395,6 +397,11 @@ public class FileChooser {
         visible = true;
     }
 
+    public void hide() {
+        visible = true;
+    }
+
+
     public void setListener(ChooseFileListener listener) {
         this.listener = listener;
     }
@@ -411,12 +418,16 @@ public class FileChooser {
         this.title = title;
     }
 
-    public String getExtension() {
-        return extension;
+    public Set<String> getExtensions() {
+        return extensions;
     }
 
-    public void setExtension(String extension) {
-        this.extension = extension;
+    public void addExtension(String extension) {
+        this.extensions.add(extension);
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 
     public boolean isVisible() {
