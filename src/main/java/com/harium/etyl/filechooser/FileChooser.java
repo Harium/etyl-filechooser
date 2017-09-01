@@ -18,6 +18,12 @@ public class FileChooser {
     private static final Color HARIUM_PRIMARY = new Color(0, 0x71, 0xBC);
     private static final Color HARIUM_GRAY = new Color(0xDC, 0xDC, 0xDC);
 
+    private Color primaryColor = HARIUM_PRIMARY;
+    private Color secondaryColor = HARIUM_GRAY;
+    private Color backgroundColor = Color.WHITE;
+
+    public static final String ERROR_LIST_FILES = "Can't list files, please check if you have such permissions";
+
     private String title = "Choose file";
 
     int w, h;
@@ -92,15 +98,15 @@ public class FileChooser {
 
     private void drawHeader(Graphics g) {
         //Draw Title Bar
-        g.setColor(HARIUM_PRIMARY);
+        g.setColor(primaryColor);
         g.fillRect(px, py, pw, titleH);
-        g.setColor(Color.WHITE);
+        g.setColor(backgroundColor);
         g.drawString(title, px, py, pw, titleH);
 
         //Draw Current Dir
-        g.setColor(HARIUM_GRAY);
+        g.setColor(secondaryColor);
         g.fillRect(px, py + titleH, pw, dirH);
-        g.setColor(Color.BLACK);
+        g.setColor(backgroundColor);
         g.drawString(currentDir, px, py + titleH, pw, dirH);
     }
 
@@ -122,10 +128,10 @@ public class FileChooser {
     private void drawButton(int bx, int by, String text, boolean active, Graphics g) {
         int hw = pw / 2;
 
-        Color background = Color.WHITE, foreground = HARIUM_PRIMARY;
+        Color background = backgroundColor, foreground = primaryColor;
         if (active) {
-            background = HARIUM_PRIMARY;
-            foreground = Color.WHITE;
+            background = primaryColor;
+            foreground = backgroundColor;
         }
 
         g.setColor(background);
@@ -173,6 +179,11 @@ public class FileChooser {
         // Add the real folders
         File rootFolder = new File(root);
         File[] listOfFiles = rootFolder.listFiles();
+
+        if (listOfFiles == null) {
+            System.err.println(ERROR_LIST_FILES);
+            return;
+        }
 
         List<String> files = new ArrayList<>();
         List<String> sorted = new ArrayList<>();
@@ -442,5 +453,29 @@ public class FileChooser {
 
     public void setChooseFile(boolean chooseFile) {
         this.chooseFile = chooseFile;
+    }
+
+    public Color getPrimaryColor() {
+        return primaryColor;
+    }
+
+    public void setPrimaryColor(Color primaryColor) {
+        this.primaryColor = primaryColor;
+    }
+
+    public Color getSecondaryColor() {
+        return secondaryColor;
+    }
+
+    public void setSecondaryColor(Color secondaryColor) {
+        this.secondaryColor = secondaryColor;
+    }
+
+    public Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(Color backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 }
