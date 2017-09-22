@@ -11,7 +11,11 @@ import com.harium.etyl.layer.ImageLayer;
 import com.harium.etyl.util.PathHelper;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class FileChooser {
 
@@ -27,16 +31,17 @@ public class FileChooser {
     private String title = "Choose file";
 
     int w, h;
-    int titleH = 36;
-    int footerH = 36;
+    int titleH = 44;
+    int footerH = 44;
 
-    int fileH = 42;
-    int dirH = fileH - 10;
+    // File Item h
+    int fileItemHeight = 42;
+    int dirH = fileItemHeight - 10;
 
     int px = 10;
     int py = 40;
-    int pw = 260;
-    int ph = 444;
+    int rectWidth = 280;
+    int rectHeight = 444;
 
     String dir = "";
     String currentDir = ".";
@@ -84,14 +89,13 @@ public class FileChooser {
         folderIcon = new ImageLayer("ui/icon/mfolder.png");
         upIcon = new ImageLayer("ui/icon/mup.png");
 
-        pw = w / 3;
-
-        px = w / 2 - pw / 2;
+        rectWidth = w / 3;
+        updateRectWidth();
 
         // Check
-        ph = h - 100 - titleH - footerH;
+        rectHeight = h - 60 - titleH - footerH;
 
-        visibleFolders = ph / fileH - 1; //Header and Sub-Header
+        visibleFolders = (rectHeight / fileItemHeight) - 1; //Header and Sub-Header
 
         openFolder(path);
     }
@@ -99,23 +103,23 @@ public class FileChooser {
     private void drawHeader(Graphics g) {
         //Draw Title Bar
         g.setColor(primaryColor);
-        g.fillRect(px, py, pw, titleH);
+        g.fillRect(px, py, rectWidth, titleH);
         g.setColor(backgroundColor);
-        g.drawString(title, px, py, pw, titleH);
+        g.drawString(title, px, py, rectWidth, titleH);
 
         //Draw Current Dir
         g.setColor(secondaryColor);
-        g.fillRect(px, py + titleH, pw, dirH);
+        g.fillRect(px, py + titleH, rectWidth, dirH);
         g.setColor(backgroundColor);
-        g.drawString(currentDir, px, py + titleH, pw, dirH);
+        g.drawString(currentDir, px, py + titleH, rectWidth, dirH);
     }
 
     private void drawFooter(Graphics g) {
         //Draw Button Bar
         int fx = px;
-        int fy = py + ph;
+        int fy = py + rectHeight;
 
-        int hw = pw / 2;
+        int hw = rectWidth / 2;
 
         drawButton(fx, fy, "Cancel", overCancel, g);
         drawButton(fx + hw, fy, "OK", overOk, g);
@@ -126,7 +130,7 @@ public class FileChooser {
     }
 
     private void drawButton(int bx, int by, String text, boolean active, Graphics g) {
-        int hw = pw / 2;
+        int hw = rectWidth / 2;
 
         Color background = backgroundColor, foreground = primaryColor;
         if (active) {
@@ -173,7 +177,7 @@ public class FileChooser {
         int fy = py + titleH + dirH;
 
         // Add Up folder
-        Folder upFolder = new Folder("Up to " + upperDir, FolderType.UP_FOLDER, px, fy, pw, fileH);
+        Folder upFolder = new Folder("Up to " + upperDir, FolderType.UP_FOLDER, px, fy, rectWidth, fileItemHeight);
         folders.add(upFolder);
 
         // Add the real folders
@@ -209,12 +213,12 @@ public class FileChooser {
 
         int i = 0;
         for (String f : sorted) {
-            folders.add(new Folder(f, px, fy + fileH * (i + 1), pw, fileH));
+            folders.add(new Folder(f, px, fy + fileItemHeight * (i + 1), rectWidth, fileItemHeight));
             i++;
         }
 
         for (String f : files) {
-            folders.add(new Folder(f, FolderType.FILE, px, fy + fileH * (i + 1), pw, fileH));
+            folders.add(new Folder(f, FolderType.FILE, px, fy + fileItemHeight * (i + 1), rectWidth, fileItemHeight));
             i++;
         }
     }
@@ -223,15 +227,15 @@ public class FileChooser {
         int mx = event.getX();
         int my = event.getY();
 
-        if (!visible || mx < px || mx > px + pw) {
+        if (!visible || mx < px || mx > px + rectWidth) {
             return;
         }
 
         onMouse = NULL_FOLDER;
 
-        if (my > py + ph) {
+        if (my > py + rectHeight) {
             // verify footer
-            if (mx < px + pw / 2) {
+            if (mx < px + rectWidth / 2) {
                 overCancel = true;
                 overOk = false;
                 if (event.isButtonDown(MouseEvent.MOUSE_BUTTON_LEFT)) {
@@ -269,11 +273,11 @@ public class FileChooser {
                 }
 
                 if (folders.size() > visibleFolders) {
-                    //7 => ph / fileH
+                    //7 => rectHeight / fileItemHeight
                     if (!clicked) {
                         clicked = true;
-                        if (mx > px && mx < px + pw &&
-                                my > py && my < py + ph) {
+                        if (mx > px && mx < px + rectWidth &&
+                                my > py && my < py + rectHeight) {
                             ey = my - offsetY;
                         }
                     } else {
@@ -327,7 +331,7 @@ public class FileChooser {
 
     private void changeOffset(PointerEvent event) {
         offsetY = event.getY() - ey;
-        int maxOffset = (folders.size() - visibleFolders) * fileH;
+        int maxOffset = (folders.size() - visibleFolders) * fileItemHeight;
         if (offsetY > 0) {
             offsetY = 0;
             ey = event.getY();
@@ -336,7 +340,7 @@ public class FileChooser {
             ey = event.getY() + maxOffset;
         }
 
-        visibleIndex = -offsetY / fileH;
+        visibleIndex = -offsetY / fileItemHeight;
     }
 
     public void draw(Graphics g) {
@@ -348,7 +352,7 @@ public class FileChooser {
         drawDarkBackground(g);
 
         g.setColor(Color.WHITE);
-        g.fillRect(px, py, pw, ph);
+        g.fillRect(px, py, rectWidth, rectHeight);
 
         drawFolders(g);
         drawHeader(g);
@@ -374,7 +378,7 @@ public class FileChooser {
 
             g.setColor(HARIUM_GRAY);
             int lineY = fy + folder.layer.getH();
-            g.drawLine(px, lineY, px + pw - 1, lineY);
+            g.drawLine(px, lineY, px + rectWidth - 1, lineY);
 
             g.setColor(HARIUM_PRIMARY);
 
@@ -412,6 +416,17 @@ public class FileChooser {
         visible = true;
     }
 
+    private void updateRectWidth() {
+        px = w / 2 - rectWidth / 2;
+        for (Folder folder : folders) {
+            folder.layer.setX(px);
+            folder.layer.setW(rectWidth);
+        }
+    }
+
+    private void updateRectHeight() {
+        py = h / 2 - rectHeight / 2;
+    }
 
     public void setListener(ChooseFileListener listener) {
         this.listener = listener;
@@ -477,5 +492,31 @@ public class FileChooser {
 
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
+    }
+
+    public int getRectWidth() {
+        return rectWidth;
+    }
+
+    public void setRectWidth(int pw) {
+        this.rectWidth = pw;
+        updateRectWidth();
+    }
+
+    public int getRectHeight() {
+        return rectHeight;
+    }
+
+    public void setRectHeight(int rectHeight) {
+        this.rectHeight = rectHeight;
+        updateRectHeight();
+    }
+
+    public int getFileItemHeight() {
+        return fileItemHeight;
+    }
+
+    public void setFileItemHeight(int fileItemHeight) {
+        this.fileItemHeight = fileItemHeight;
     }
 }
