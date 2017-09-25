@@ -38,4 +38,7 @@ public class Folder {
         return false;
     }
 
+    public FolderType getType() {
+        return type;
+    }
 }

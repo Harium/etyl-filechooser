@@ -11,11 +11,7 @@ import com.harium.etyl.layer.ImageLayer;
 import com.harium.etyl.util.PathHelper;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class FileChooser {
 
@@ -77,6 +73,7 @@ public class FileChooser {
 
     String path;
     private ChooseFileListener listener;
+    private static final int DEFAULT_BORDER = 100;
 
     public FileChooser(int w, int h, String path) {
         this.path = path;
@@ -93,9 +90,10 @@ public class FileChooser {
         updateRectWidth();
 
         // Check
-        rectHeight = h - 60 - titleH - footerH;
+        rectHeight = h - DEFAULT_BORDER;
+        updateRectHeight();
 
-        visibleFolders = (rectHeight / fileItemHeight) - 1; //Header and Sub-Header
+        visibleFolders = ((rectHeight - headerH()) / fileItemHeight); //Header and Sub-Header
 
         openFolder(path);
     }
@@ -117,7 +115,7 @@ public class FileChooser {
     private void drawFooter(Graphics g) {
         //Draw Button Bar
         int fx = px;
-        int fy = py + rectHeight;
+        int fy = py + rectHeight - footerH;
 
         int hw = rectWidth / 2;
 
@@ -174,7 +172,7 @@ public class FileChooser {
     private void loadFolders(String root) {
         folders.clear();
 
-        int fy = py + titleH + dirH;
+        int fy = py + headerH();
 
         // Add Up folder
         Folder upFolder = new Folder("Up to " + upperDir, FolderType.UP_FOLDER, px, fy, rectWidth, fileItemHeight);
@@ -227,13 +225,13 @@ public class FileChooser {
         int mx = event.getX();
         int my = event.getY();
 
-        if (!visible || mx < px || mx > px + rectWidth) {
+        if (!visible || mx < px + headerH() || mx > px + rectWidth || my > py + rectHeight) {
             return;
         }
 
         onMouse = NULL_FOLDER;
 
-        if (my > py + rectHeight) {
+        if (my > py + rectHeight - footerH && !dragged) {
             // verify footer
             if (mx < px + rectWidth / 2) {
                 overCancel = true;
@@ -260,10 +258,12 @@ public class FileChooser {
             disableFooterButtons();
 
             int all = visibleFolders();
-            for (int i = 0; i < all; i++) {
-                Folder folder = folders.get(visibleIndex + i);
-                if (folder.updateMouse(mx, my - offsetY)) {
-                    onMouse = folder;
+            for (int i = visibleIndex; i < visibleIndex + all; i++) {
+                if (i < folders.size()) {
+                    Folder folder = folders.get(i);
+                    if (folder.updateMouse(mx, my - offsetY)) {
+                        onMouse = folder;
+                    }
                 }
             }
 
@@ -331,7 +331,7 @@ public class FileChooser {
 
     private void changeOffset(PointerEvent event) {
         offsetY = event.getY() - ey;
-        int maxOffset = (folders.size() - visibleFolders) * fileItemHeight;
+        int maxOffset = (folders.size() - visibleFolders) * fileItemHeight + fileItemHeight / 2;
         if (offsetY > 0) {
             offsetY = 0;
             ey = event.getY();
@@ -352,11 +352,15 @@ public class FileChooser {
         drawDarkBackground(g);
 
         g.setColor(Color.WHITE);
-        g.fillRect(px, py, rectWidth, rectHeight);
+        g.fillRect(px, py + headerH(), rectWidth, rectHeight - headerH());
 
         drawFolders(g);
         drawHeader(g);
         drawFooter(g);
+    }
+
+    private int headerH() {
+        return titleH + dirH;
     }
 
     private void drawDarkBackground(Graphics g) {
@@ -370,8 +374,15 @@ public class FileChooser {
     private void drawFolders(Graphics g) {
         int all = visibleFolders();
 
-        for (int i = 0; i < all; i++) {
-            Folder folder = folders.get(visibleIndex + i);
+        for (int i = visibleIndex; i < visibleIndex + all; i++) {
+
+            Folder folder;
+
+            if (i >= folders.size()) {
+                folder = folders.get(folders.size() - 1);
+            } else {
+                folder = folders.get(i);
+            }
 
             int fx = folder.layer.getX();
             int fy = folder.layer.getY() + offsetY;
@@ -402,9 +413,6 @@ public class FileChooser {
 
     private int visibleFolders() {
         int all = visibleFolders;
-        if (visibleFolders > folders.size()) {
-            all = folders.size();
-        }
         return all;
     }
 
