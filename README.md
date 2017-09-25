@@ -5,16 +5,16 @@ A filechooser module to Etyl
 ### Maven
 ```
 <dependency>
-    <groupId>com.harium</groupId>
-    <artifactId>etyl-filechooser</artifactId>
-    <version>1.0.4</version>
+    <groupId>com.harium.etyl</groupId>
+    <artifactId>filechooser</artifactId>
+    <version>1.0.6</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```
-compile "com.harium:etyl-filechooser:1.0.4"
+compile "com.harium.etyl:filechooser:1.0.6"
 ```
 
 ## Android
